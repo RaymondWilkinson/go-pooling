@@ -9,6 +9,10 @@ type PooledGrpcClient struct {
 	pool *ConnPool
 }
 
+func NewPooledGrpcClient(opt *Options) *PooledGrpcClient {
+	return &PooledGrpcClient{NewConnPool(opt)}
+}
+
 func (p *PooledGrpcClient) Invoke(ctx context.Context, method string, args interface{}, reply interface{}, opts ...grpc.CallOption) error {
 	conn, err := p.pool.Get(ctx)
 	if err != nil {
@@ -31,8 +35,6 @@ func (p *PooledGrpcClient) NewStream(ctx context.Context, desc *grpc.StreamDesc,
 	defer func() {
 		p.pool.Put(ctx, conn)
 	}()
-
-
 
 	return conn.NewStream(ctx, desc, method, opts...)
 }
